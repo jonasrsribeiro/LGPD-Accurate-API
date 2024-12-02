@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -36,8 +36,8 @@ class Consentimento(Base):
 Usuario.consentimentos = relationship("Consentimento", back_populates="usuario")
 Termo.consentimentos = relationship("Consentimento", back_populates="termo")
 
-class HistoricoExclusaoDB2(Base):
-    __tablename__ = 'historico_exclusao'
+class HistoricExclusion(Base):
+    __tablename__ = 'historic_exclusions'
     id = Column(Integer, primary_key=True)
     usuario_id = Column(Integer, nullable=False)
     data_remocao = Column(DateTime, default=datetime.utcnow)
