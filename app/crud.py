@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models import User, Term, Consent, HistoricoExclusaoDB2
+from app.models import User, Terms, Consent, HistoricExclusion
 
 def create_user(db: Session, name: str, email: str, password: str):
     new_user = User(name=name, email=email, password=password)
