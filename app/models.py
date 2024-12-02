@@ -21,15 +21,12 @@ class Termo(Base):
     data_criacao = Column(DateTime, default=datetime.utcnow)
 
 class Consentimento(Base):
-    __tablename__ = 'consentimentos'  
+    __tablename__ = 'consentimentos'
+
     id = Column(Integer, primary_key=True)
-    
     id_usuario = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
-    
     id_termo = Column(Integer, ForeignKey('termos.id'), nullable=False)
-    
     data_aceite = Column(DateTime, default=datetime.utcnow)
-    
     usuario = relationship("Usuario", back_populates="consentimentos")
     termo = relationship("Termo", back_populates="consentimentos")
 
@@ -37,7 +34,8 @@ Usuario.consentimentos = relationship("Consentimento", back_populates="usuario")
 Termo.consentimentos = relationship("Consentimento", back_populates="termo")
 
 class HistoricExclusion(Base):
-    __tablename__ = 'historic_exclusions'
+    __tablename__ = 'historico_exclusoes'
+
     id = Column(Integer, primary_key=True)
     usuario_id = Column(Integer, nullable=False)
     data_remocao = Column(DateTime, default=datetime.utcnow)
