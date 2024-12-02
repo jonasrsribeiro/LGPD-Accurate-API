@@ -1,10 +1,10 @@
-from flask import jsonify, request
-from models import Usuario, Consentimento, Termo
+from flask import jsonify, request, render_template
+from .models import Usuario, Consentimento, Termo
 from app import db
 
 def index():
-    terms = Termo.query.all()
-    return render_template('consent.html', terms=terms)
+    termos = Termo.query.all()
+    return render_template('consent.html', termos=termos)
 
 def portabilidade(usuario_id):
     usuario_atual = Usuario.query.get_or_404(usuario_id)
@@ -16,8 +16,8 @@ def portabilidade(usuario_id):
     return jsonify(dados)
 
 def aceitar_consentimento():
-    id_usuario = request.json.get('user_id')
-    id_termo = request.json.get('term_id')
+    id_usuario = request.json.get('id_usuario')
+    id_termo = request.json.get('id_termo')
     consentimento = Consentimento(id_usuario=id_usuario, id_termo=id_termo)
     db.session.add(consentimento)
     db.session.commit()
@@ -31,7 +31,7 @@ def revogar_consentimento():
     return jsonify({"message": "Consentimento revogado."})
 
 def criar_novo_termo():
-    versao = request.json.get('version')
+    versao = request.json.get('versao')
     itens_obrigatorios = request.json.get('itens_obrigatorios')
     itens_opcionais = request.json.get('itens_opcionais', '')
     termo = Termo(versao=versao, itens_obrigatorios=itens_obrigatorios, itens_opcionais=itens_opcionais)
@@ -42,7 +42,7 @@ def criar_novo_termo():
 def historico(usuario_id):
     consentimentos = Consentimento.query.filter_by(id_usuario=usuario_id).all()
     historico = [
-        {"term_id": c.id_termo, "accepted_at": c.data_aceite}
+        {"id_termo": c.id_termo, "data_aceite": c.data_aceite}
         for c in consentimentos
     ]
     return jsonify(historico)

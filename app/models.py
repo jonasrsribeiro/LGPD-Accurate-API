@@ -2,10 +2,9 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
-from app import db
 
 class Usuario(Base):
-    __tablename__ = 'usuarios'  
+    __tablename__ = 'usuarios'
     
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False, index=True)
