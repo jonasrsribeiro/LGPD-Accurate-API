@@ -2,131 +2,148 @@ from app.models import Usuario, Termo, Consentimento, HistoricoExclusao, ItemTer
 from .database import db
 
 def create_user(nome: str, email: str, senha: str):
-    novo_usuario = Usuario(nome=nome, email=email, senha=senha)
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
-    return novo_usuario
+    try:
+        novo_usuario = Usuario(nome=nome, email=email, senha=senha)
+        print("novo_usuario: ", novo_usuario)
+        db.session.add(novo_usuario)
+        db.session.commit()
+        db.session.refresh(novo_usuario)
+        return novo_usuario.to_dict()
+    except Exception as e:
+        db.session.rollback()  # Reverte a transação em caso de erro
+        print("Erro ao criar usuário:", e)
+        return None
 
-def get_user(usuario_id: int):
-    return db.query(Usuario).filter(Usuario.id == usuario_id).first()
+def get_user(usuario_id: int, usage=False):
+    usuario =  db.session.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usage:
+        return usuario
+    return usuario.to_dict()
 
 def get_user_all():
-    return db.query(Usuario).all()
+    usuarios = db.session.query(Usuario).all()
+    return [usuario.to_dict() for usuario in usuarios]
+
 
 def update_user(usuario_id: int, nome: str, email: str, senha: str, ativo: bool):
-    usuario = get_user(usuario_id)
-    if usuario is None:
+    usuario = get_user(usuario_id, usage=True)
+    if usuario is None: 
         return None
     usuario.nome = nome
     usuario.email = email
     usuario.senha = senha
     usuario.ativo = ativo
     
-    db.commit()
-    db.refresh(usuario)
-    return usuario
+    db.session.commit()
+    db.session.refresh(usuario)
+    return usuario.to_dict()
 
 def delete_user(usuario_id: int):
-    usuario = get_user(usuario_id)
+    usuario = get_user(usuario_id, usage=True)
     if usuario is None:
         return None
-    
-    db.delete(usuario)
-    db.commit()
-    return usuario
+    print("Usuario: ", usuario)
+    db.session.delete(usuario)
+    db.session.commit()
+    return usuario.to_dict()
 
 def create_term(versao: str, atual: bool):
     novo_termo = Termo(versao=versao, atual=atual)
     
-    db.add(novo_termo)
-    db.commit()
-    db.refresh(novo_termo)
-    return novo_termo
+    db.session.add(novo_termo)
+    db.session.commit()
+    db.session.refresh(novo_termo)
+    return novo_termo.to_dict()
 
-def get_term(termo_id: int):
-    
-    return db.query(Termo).filter(Termo.id == termo_id).first()
+def get_term(termo_id: int, usage=False):
+    termo = db.session.query(Termo).filter(Termo.id == termo_id).first()
+    if usage:
+        return termo
+    return termo.to_dict()
 
 def get_term_all():
-    
-    return db.query(Termo).all()
+    termos = db.session.query(Termo).all()
+    return [termo.to_dict() for termo in termos]
 
 def update_term(termo_id: int, versao: str, atual: bool):
-    termo = get_term(termo_id)
+    termo = get_term(termo_id, usage=True)
     if termo is None:
         return None
     termo.versao = versao
     termo.atual = atual
     
-    db.commit()
-    db.refresh(termo)
-    return termo
+    db.session.commit()
+    db.session.refresh(termo)
+    return termo.to_dict()
 
 def delete_term(termo_id: int):
-    termo = get_term(termo_id)
+    termo = get_term(termo_id, usage=True)
     if termo is None:
         return None
     
-    db.delete(termo)
-    db.commit()
+    db.session.delete(termo)
+    db.session.commit()
     return termo    
 
 def create_item_term(id_termo: int, descricao: str, obrigatorio: bool):
     novo_item_termo = ItemTermo(id_termo=id_termo, descricao=descricao, obrigatorio=obrigatorio)
     
-    db.add(novo_item_termo)
-    db.commit()
-    db.refresh(novo_item_termo)
+    db.session.add(novo_item_termo)
+    db.session.commit()
+    db.session.refresh(novo_item_termo)
     return novo_item_termo
 
-def get_item_term(item_termo_id: int):
-    
-    return db.query(ItemTermo).filter(ItemTermo.id == item_termo_id).first()
+def get_item_term(item_termo_id: int, usage=False):
+    item_termo = db.session.query(ItemTermo).filter(ItemTermo.id == item_termo_id).first()
+    if usage:
+        return item_termo
+    return item_termo.to_dict()
 
 def get_item_term_all():
-    
-    return db.query(ItemTermo).all()
+    items_termos = db.session.query(ItemTermo).all()
+    return [item_termo.to_dict() for item_termo in items_termos]
 
 def update_item_term(item_termo_id: int, id_termo: int, descricao: str, obrigatorio: bool):
-    item_termo = get_item_term(item_termo_id)
+    item_termo = get_item_term(item_termo_id, usage=True)
     if item_termo is None:
         return None
     item_termo.id_termo = id_termo
     item_termo.descricao = descricao
     item_termo.obrigatorio = obrigatorio
     
-    db.commit()
-    db.refresh(item_termo)
+    db.session.commit()
+    db.session.refresh(item_termo)
     return item_termo
 
 def delete_item_term(item_termo_id: int):
-    item_termo = get_item_term(item_termo_id)
+    item_termo = get_item_term(item_termo_id, usage=True)
     if item_termo is None:
         return None
     
-    db.delete(item_termo)
-    db.commit()
+    db.session.delete(item_termo)
+    db.session.commit()
     return item_termo
 
 def create_consent(id_usuario: int, id_item_termo: int, id_termo: int):
     novo_consentimento = Consentimento(id_usuario=id_usuario, id_item_termo=id_item_termo, id_termo=id_termo)
     
-    db.add(novo_consentimento)
-    db.commit()
-    db.refresh(novo_consentimento)
-    return novo_consentimento
+    db.session.add(novo_consentimento)
+    db.session.commit()
+    db.session.refresh(novo_consentimento)
+    return novo_consentimento.to_dict()
 
-def get_consent(consentimento_id: int):
-    
-    return db.query(Consentimento).filter(Consentimento.id == consentimento_id).first()
+def get_consent(consentimento_id: int, usage=False):
+    consentimento = db.session.query(Consentimento).filter(Consentimento.id == consentimento_id).first()
+    if usage:
+        return consentimento
+    return consentimento.to_dict()
 
 def get_consent_all():
-    
-    return db.query(Consentimento).all()
+    consentimentos = db.session.query(Consentimento).all()
+    return [consentimento.to_dict() for consentimento in consentimentos]
 
 def update_consent(consentimento_id: int, id_usuario: int, id_item_termo: int, id_termo: int):
-    consentimento = get_consent(consentimento_id)
+    consentimento = get_consent(consentimento_id, usage=True)
     
     if consentimento is None:
         return None
@@ -134,33 +151,37 @@ def update_consent(consentimento_id: int, id_usuario: int, id_item_termo: int, i
     consentimento.id_item_termo = id_item_termo
     consentimento.id_termo = id_termo
     
-    db.commit()
-    db.refresh(consentimento)
-    return consentimento
+    db.session.commit()
+    db.session.refresh(consentimento)
+    return consentimento.to_dict()
 
 def delete_consent(consentimento_id: int):
-    consentimento = get_consent(consentimento_id)
+    consentimento = get_consent(consentimento_id, usage=True)
     
     if consentimento is None:
         return None
     
-    db.delete(consentimento)
-    db.commit()
-    return consentimento
+    db.session.delete(consentimento)
+    db.session.commit()
+    return consentimento.to_dict()
 
 def create_historic_exclusion(usuario_id: int):
     nova_exclusao = HistoricoExclusao(usuario_id=usuario_id)
-    db.add(nova_exclusao)
-    db.commit()
-    db.refresh(nova_exclusao)
+    db.session.add(nova_exclusao)
+    db.session.commit()
+    db.session.refresh(nova_exclusao)
     return nova_exclusao
 
-def get_historic_exclusion(exclusao_id: int):
-    
-    return db.query(HistoricoExclusao).filter(HistoricoExclusao.id == exclusao_id).first()
+def get_historic_exclusion(exclusao_id: int, usage=False):
+    historico_exclusao = db.session.query(HistoricoExclusao).filter(HistoricoExclusao.id == exclusao_id).first()
+    if usage:
+        return historico_exclusao
+    return historico_exclusao.to_dict() 
 
-def get_historic_exclusion_all():
-    
-    return db.query(HistoricoExclusao).all()
+def get_historic_exclusion_all(usage=False):
+    hitorico_exclusoes = db.session.query(HistoricoExclusao).all()
+    if usage:
+        return hitorico_exclusoes
+    return [historico_exclusao.to_dict() for historico_exclusao in hitorico_exclusoes]
 
 

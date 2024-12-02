@@ -1,48 +1,173 @@
-from flask import jsonify, request, render_template
+from http.client import HTTPException
+from flask import app, jsonify, request, render_template, Blueprint
 from .models import Usuario, Consentimento, Termo
-from app import db
+from app.models import Usuario, Termo, ItemTermo, Consentimento, HistoricoExclusao
+from app.crud import (
+    create_user, get_user, get_user_all, update_user, delete_user,
+    create_term, get_term, get_term_all, update_term, delete_term,
+    create_item_term, get_item_term, get_item_term_all, update_item_term, delete_item_term,
+    create_consent, get_consent, get_consent_all, update_consent, delete_consent,
+    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all,)
 
-def index():
-    termos = Termo.query.all()
-    return render_template('consent.html', termos=termos)
 
-def portabilidade(usuario_id):
-    usuario_atual = Usuario.query.get_or_404(usuario_id)
-    dados = {
-        "id": usuario_atual.id,
-        "nome": usuario_atual.nome,
-        "email": usuario_atual.email
-    }
-    return jsonify(dados)
 
-def aceitar_consentimento():
-    id_usuario = request.json.get('id_usuario')
-    id_termo = request.json.get('id_termo')
-    consentimento = Consentimento(id_usuario=id_usuario, id_termo=id_termo)
-    db.session.add(consentimento)
-    db.session.commit()
-    return jsonify({"message": "Consentimento registrado."})
+bp = Blueprint('routes', __name__)
 
-def revogar_consentimento():
-    id_usuario = request.json.get('id_usuario')
-    id_termo = request.json.get('id_termo')
-    Consentimento.query.filter_by(id_usuario=id_usuario, id_termo=id_termo).delete()
-    db.session.commit()
-    return jsonify({"message": "Consentimento revogado."})
+# USERS
 
-def criar_novo_termo():
-    versao = request.json.get('versao')
-    itens_obrigatorios = request.json.get('itens_obrigatorios')
-    itens_opcionais = request.json.get('itens_opcionais', '')
-    termo = Termo(versao=versao, itens_obrigatorios=itens_obrigatorios, itens_opcionais=itens_opcionais)
-    db.session.add(termo)
-    db.session.commit()
-    return jsonify({"message": "Termo criado."})
+@bp.route("/usuarios/", methods=["POST"])
+def create_user_route():
+    data = request.get_json()
+    print("Data:", data)
 
-def historico(usuario_id):
-    consentimentos = Consentimento.query.filter_by(id_usuario=usuario_id).all()
-    historico = [
-        {"id_termo": c.id_termo, "data_aceite": c.data_aceite}
-        for c in consentimentos
-    ]
-    return jsonify(historico)
+    nome = data['nome']
+    email = data['email']
+    senha = data['senha']
+    print("Nome: ", nome)
+    return jsonify(create_user(nome, email, senha))
+
+@bp.route("/usuarios/<int:usuario_id>", methods=["GET"])
+def get_user_route(usuario_id: int):
+    user = get_user(usuario_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return jsonify(user)
+
+@bp.route("/usuarios/", methods=["GET"])
+def get_all_users_route():
+    return jsonify(get_user_all())
+
+@bp.route("/usuarios/<int:usuario_id>",methods=["PUT"])
+def update_user_route(usuario_id: int):
+    data = request.form
+    nome = data.get("nome")
+    email = data.get("email")
+    senha = data.get("senha")
+    ativo = bool(data.get("ativo"))
+
+    user = update_user(usuario_id, nome, email, senha, ativo)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return jsonify(user)
+
+@bp.route("/usuarios/deletar/<int:usuario_id>", methods=["DELETE"])
+def delete_user_route(usuario_id: int):
+    user = delete_user(usuario_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return jsonify({"message": "Usuário excluído com sucesso", "usuario": user})
+
+
+## TERMOS
+
+@bp.route("/termos/", methods=["POST"])
+def create_term_route():
+    data = request.form
+    versao = data.get("versao")
+    atual = data.get("atual")
+    return jsonify(create_term(versao, atual))
+
+@bp.route("/termos/<int:termo_id>", methods=["GET"])
+def get_term_route(termo_id: int):
+    term = get_term(termo_id)
+    if not term:
+        raise HTTPException(status_code=404, detail="Termo não encontrado")
+    return jsonify(term)
+
+@bp.route("/termos/",methods=["GET"])
+def get_all_terms_route():
+    return jsonify(get_term_all())
+
+@bp.route("/termos/<int:termo_id>", methods=["PUT"])
+def update_term_route(termo_id: int):
+    data = request.form
+    versao = data.get("versao")
+    atual = data.get("atual")    
+    term = update_term(termo_id, versao, atual)
+    if not term:
+        raise HTTPException(status_code=404, detail="Termo não encontrado")
+    return jsonify(term)
+
+@bp.route("/termos/<int:termo_id>", methods=["DELETE"])
+def delete_term_route(termo_id: int):
+    term = delete_term(termo_id)
+    if not term:
+        raise HTTPException(status_code=404, detail="Termo não encontrado")
+    return jsonify({"message": "Termo excluído com sucesso", "termo": term})
+
+# ITEMS DOS TERMOS
+
+@bp.route("/termos/items/", methods=["POST"])
+def create_item_term_route(id_termo: int):
+    data = request.form
+    descricao = data.get("descricao")
+    obrigatorio = data.get("obrigatorio")
+    return jsonify(create_item_term(id_termo, descricao, obrigatorio))
+
+@bp.route("/termos/items/<int:item_termo_id>")
+def get_item_term_route(item_termo_id: int):
+    item = get_item_term(item_termo_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item do termo não encontrado")
+    return jsonify(item)
+
+@bp.route("/termos/items/", methods=["GET"])
+def get_all_items_term_route():
+    return jsonify(get_item_term_all())
+
+@bp.route("/termos/items/<int:item_termo_id>", methods=["PUT"])
+def update_item_term_route(item_termo_id: int):
+    data = request.form
+    descricao = data.get("descricao")
+    id_termo = int(data.get("id_termo"))
+    obrigatorio = bool(data.get("obrigatorio"))
+    item = update_item_term(item_termo_id, id_termo, descricao, obrigatorio)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item do termo não encontrado")
+    return jsonify(item)
+
+@bp.route("/termos/items/<int:item_termo_id>", methods=["DELETE"])
+def delete_item_term_route(item_termo_id: int):
+    item = delete_item_term(item_termo_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item do termo não encontrado")
+    return jsonify({"message": "Item do termo excluído com sucesso", "item_termo": item})
+
+# Consentimento
+
+@bp.route("/consentimento/",methods=["POST"])
+def create_consent_route(id_usuario: int, id_item_termo: int, id_termo: int):
+    data = request.form
+    id_usuario = int(data.get("id_usuario"))
+    id_item_termo = int(data.get("id_item_termo"))
+    id_termo = int(data.get("id_termo"))
+    return jsonify(create_consent(id_usuario, id_item_termo, id_termo))
+
+@bp.route("/consentimento/<int:consentimento_id>", methods=["GET"])
+def get_consent_route(consentimento_id: int):
+    consent = get_consent(consentimento_id)
+    if not consent:
+        raise HTTPException(status_code=404, detail="Consentimento não encontrado")
+    return jsonify(consent)
+
+@bp.route("/consentimento/", methods=["GET"])
+def get_all_consents_route():
+    return jsonify(get_consent_all())
+
+@bp.route("/consentimento/<int:consentimento_id>", methods=["PUT"])
+def update_consent_route(consentimento_id: int, id_usuario: int, id_item_termo: int, id_termo: int):
+    data = request.form
+    id_usuario = int(data.get("id_usuario"))
+    id_item_termo = int(data.get("id_item_termo"))
+    id_termo = int(data.get("id_termo"))
+    consent = update_consent(consentimento_id, id_usuario, id_item_termo, id_termo)
+    if not consent:
+        raise HTTPException(status_code=404, detail="Consentimento não encontrado")
+    return jsonify(consent)
+
+@bp.route("/consentimento/<int:consentimento_id>", methods=["DELETE"])
+def delete_consent_route(consentimento_id: int):
+    consent = delete_consent(consentimento_id)
+    if not consent:
+        raise HTTPException(status_code=404, detail="Consentimento não encontrado")
+    return jsonify({"message": "Consentimento excluído com sucesso", "consentimento": consent})
