@@ -7,7 +7,7 @@ class Usuario(Base):
     __tablename__ = 'usuarios'
     
     id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String, nullable=False, index=True)
+    nome = Column(String(100), nullable=False, index=True)
     email = Column(String(120), unique=True, nullable=False)
     senha = Column(String(120), nullable=False)
 
@@ -16,8 +16,8 @@ class Termo(Base):
 
     id = Column(Integer, primary_key=True)
     versao = Column(String(10), nullable=False)
-    itens_obrigatorios = Column(String, nullable=False)
-    itens_opcionais = Column(String, nullable=True)
+    itens_obrigatorios = Column(String(50), nullable=False)
+    itens_opcionais = Column(String(50), nullable=True)
     data_criacao = Column(DateTime, default=datetime.utcnow)
 
 class Consentimento(Base):
