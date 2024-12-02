@@ -1,21 +1,21 @@
-from . import db
 from datetime import datetime
+from app import db
 
-class User(db.Model):
+class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
+    nome = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)  # Encriptado
+    senha = db.Column(db.String(120), nullable=False)
 
-class Consent(db.Model):
+class Consentimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    term_id = db.Column(db.Integer, db.ForeignKey('term.id'), nullable=False)
-    accepted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    id_termo = db.Column(db.Integer, db.ForeignKey('termo.id'), nullable=False)
+    data_aceite = db.Column(db.DateTime, default=datetime.utcnow)
 
-class Term(db.Model):
+class Termo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    version = db.Column(db.String(10), nullable=False)
-    mandatory_items = db.Column(db.Text, nullable=False)
-    optional_items = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    versao = db.Column(db.String(10), nullable=False)
+    itens_obrigatorios = db.Column(db.Text, nullable=False)
+    itens_opcionais = db.Column(db.Text, nullable=True)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)

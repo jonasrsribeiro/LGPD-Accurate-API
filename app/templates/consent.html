@@ -48,7 +48,7 @@
 <body>
     <h1>Termos e Consentimentos</h1>
 
-    <form method="POST" action="/update_consent">
+    <form method="POST" action="/consentimento/aceitar">
         <table>
             <thead>
                 <tr>
@@ -82,7 +82,7 @@
     <script>
         function revokeConsent() {
             if (confirm("Tem certeza de que deseja revogar os consentimentos?")) {
-                window.location.href = "/revoke_consent";
+                window.location.href = "/consentimento/revogar";
             }
         }
     </script>
