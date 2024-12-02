@@ -21,21 +21,33 @@ class Termo(Base):
     itens_opcionais = Column(String, nullable=True)
     data_criacao = Column(DateTime, default=datetime.utcnow)
 
+class ItemTermo(Base):
+    __tablename__ = 'itens_termos'
+
+    id = Column(Integer, primary_key=True)
+    id_termo = Column(Integer, ForeignKey('termos.id'), nullable=False)
+    descricao = Column(String, nullable=False)
+    obrigatorio = Column(Boolean, nullable=False)
+
+    termo = relationship("ItemTermo", back_populates="termos")
+
+Termo.termos = relationship("ItemTermo", back_populates="termo")
+
 class Consentimento(Base):
     __tablename__ = 'consentimentos'  
     id = Column(Integer, primary_key=True)
     
     id_usuario = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
     
-    id_termo = Column(Integer, ForeignKey('termos.id'), nullable=False)
+    id_item_termo = Column(Integer, ForeignKey('items_termo.id'), nullable=False)
     
     data_aceite = Column(DateTime, default=datetime.utcnow)
     
     usuario = relationship("Usuario", back_populates="consentimentos")
-    termo = relationship("Termo", back_populates="consentimentos")
+    termo = relationship("ItemTermo", back_populates="consentimentos")
 
 Usuario.consentimentos = relationship("Consentimento", back_populates="usuario")
-Termo.consentimentos = relationship("Consentimento", back_populates="termo")
+ItemTermo.consentimentos = relationship("Consentimento", back_populates="item")
 
 class HistoricExclusion(Base):
     __tablename__ = 'historic_exclusions'

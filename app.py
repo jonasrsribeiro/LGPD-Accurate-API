@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from models import Usuario, Consentimento, Termo
+from app.models import Usuario, Consentimento, Termo
 from routes import portabilidade, aceitar_consentimento, revogar_consentimento, criar_novo_termo, historico
 
 app = Flask(__name__)
