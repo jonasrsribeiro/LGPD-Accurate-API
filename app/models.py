@@ -18,9 +18,7 @@ class Termo(Base):
 
     id = Column(Integer, primary_key=True)
     versao = Column(String(10), nullable=False)
-    
-    itens_obrigatorios = Column(String(50), nullable=False)
-    itens_opcionais = Column(String(50), nullable=True)
+    atual = Column(Boolean, nullable=False)
     data_criacao = Column(DateTime, default=datetime.utcnow)
 
     itens = relationship("ItemTermo", back_populates="termo")
@@ -32,7 +30,6 @@ class ItemTermo(Base):
     id_termo = Column(Integer, ForeignKey('termos.id'), nullable=False)
     descricao = Column(String, nullable=False)
     obrigatorio = Column(Boolean, nullable=False)
-
     termo = relationship("Termo", back_populates="itens")
     consentimentos = relationship("Consentimento", back_populates="item_termo")
 
