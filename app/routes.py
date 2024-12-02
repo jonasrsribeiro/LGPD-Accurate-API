@@ -1,9 +1,9 @@
 from flask import jsonify
 from .models import User
 
-@app.route('/portability/<int:user_id>', methods=['GET'])
-def portability(user_id):
-    user = User.query.get_or_404(user_id)
+@app.route('/portabilidade/<int:usuario_id>', methods=['GET'])
+def portabilidade(usuario_id):
+    user = User.query.get_or_404(usuario_id)
     data = {
         "id": user.id,
         "name": user.name,
@@ -11,25 +11,25 @@ def portability(user_id):
     }
     return jsonify(data)
 
-@app.route('/consent/accept', methods=['POST'])
-def accept_consent():
+@app.route('/consentimento/aceitar', methods=['POST'])
+def aceitar_consentimento():
     user_id = request.json.get('user_id')
     term_id = request.json.get('term_id')
     consent = Consent(user_id=user_id, term_id=term_id)
     db.session.add(consent)
     db.session.commit()
-    return jsonify({"message": "Consent registered."})
+    return jsonify({"message": "Consentimento registrado."})
 
-@app.route('/consent/revoke', methods=['POST'])
-def revoke_consent():
+@app.route('/consentimento/revogar', methods=['POST'])
+def revogar_consentimento():
     user_id = request.json.get('user_id')
     term_id = request.json.get('term_id')
     Consent.query.filter_by(user_id=user_id, term_id=term_id).delete()
     db.session.commit()
-    return jsonify({"message": "Consent revoked."})
+    return jsonify({"message": "Consentimento revogado."})
 
-@app.route('/terms', methods=['POST'])
-def create_term():
+@app.route('/termos', methods=['POST'])
+def criar_novo_termo():
     version = request.json.get('version')
     mandatory_items = request.json.get('mandatory_items')
     optional_items = request.json.get('optional_items', '')
@@ -38,9 +38,9 @@ def create_term():
     db.session.commit()
     return jsonify({"message": "Term created."})
 
-@app.route('/history/<int:user_id>', methods=['GET'])
-def history(user_id):
-    consents = Consent.query.filter_by(user_id=user_id).all()
+@app.route('/historico/<int:usuario_id>', methods=['GET'])
+def historico(usuario_id):
+    consents = Consent.query.filter_by(usuario_id=usuario_id).all()
     history = [
         {"term_id": c.term_id, "accepted_at": c.accepted_at}
         for c in consents

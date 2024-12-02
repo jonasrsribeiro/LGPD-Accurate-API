@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos e Consentimentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button.accept {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button.revoke {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Termos e Consentimentos</h1>
+
+    <form method="POST" action="/update_consent">
+        <table>
+            <thead>
+                <tr>
+                    <th>Termo</th>
+                    <th>Versão</th>
+                    <th>Obrigatório</th>
+                    <th>Consentimento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for term in terms %}
+                <tr>
+                    <td>{{ term.description }}</td>
+                    <td>{{ term.version }}</td>
+                    <td>{{ "Sim" if term.mandatory else "Não" }}</td>
+                    <td>
+                        <input 
+                            type="checkbox" 
+                            name="term_{{ term.id }}" 
+                            value="1" 
+                            {% if term.mandatory %}checked disabled{% elif term.consent_given %}checked{% endif %}>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="accept">Aceitar</button>
+        <button type="button" class="revoke" onclick="revokeConsent()">Revogar</button>
+    </form>
+
+    <script>
+        function revokeConsent() {
+            if (confirm("Tem certeza de que deseja revogar os consentimentos?")) {
+                window.location.href = "/revoke_consent";
+            }
+        }
+    </script>
+</body>
+</html>
