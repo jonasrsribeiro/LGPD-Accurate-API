@@ -10,6 +10,7 @@ class Usuario(Base):
     nome = Column(String(100), nullable=False, index=True)
     email = Column(String(120), unique=True, nullable=False)
     senha = Column(String(120), nullable=False)
+    ativo = Column(Boolean, default=True)
 
     consentimentos = relationship("Consentimento", back_populates="usuario")
 

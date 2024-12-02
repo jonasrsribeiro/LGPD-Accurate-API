@@ -19,7 +19,7 @@ def get_user_all():
     db = get_db1()
     return db.query(Usuario).all()
 
-def update_user(usuario_id: int, nome: str, email: str, senha: str):
+def update_user(usuario_id: int, nome: str, email: str, senha: str, ativo: bool):
     usuario = get_user(usuario_id)
     db = get_db1()
     if usuario is None:
@@ -27,6 +27,7 @@ def update_user(usuario_id: int, nome: str, email: str, senha: str):
     usuario.nome = nome
     usuario.email = email
     usuario.senha = senha
+    usuario.ativo = ativo
     db.commit()
     db.refresh(usuario)
     return usuario
