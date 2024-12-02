@@ -25,10 +25,8 @@ class Consentimento(Base):
     __tablename__ = 'consentimentos'  
     id = Column(Integer, primary_key=True)
     
-    # Chave estrangeira para a tabela 'usuarios'
     id_usuario = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
     
-    # Chave estrangeira para a tabela 'termos'
     id_termo = Column(Integer, ForeignKey('termos.id'), nullable=False)
     
     data_aceite = Column(DateTime, default=datetime.utcnow)
