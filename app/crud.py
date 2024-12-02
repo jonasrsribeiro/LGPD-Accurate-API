@@ -1,5 +1,6 @@
 from app.models import Usuario, Termo, Consentimento, HistoricoExclusao, ItemTermo
 from .database import db
+from datetime import datetime
 
 def create_user(nome: str, email: str, senha: str):
     try:
@@ -131,9 +132,8 @@ def delete_item_term(item_termo_id: int):
     db.session.commit()
     return item_termo
 
-def create_consent(id_usuario: int, id_item_termo: int, id_termo: int):
-    novo_consentimento = Consentimento(id_usuario=id_usuario, id_item_termo=id_item_termo, id_termo=id_termo)
-    
+def create_consent(id_usuario: int, id_item_termo: int, aceite_recusa: bool):
+    novo_consentimento = Consentimento(id_usuario=id_usuario, id_item_termo=id_item_termo, aceite_recusa=aceite_recusa)
     db.session.add(novo_consentimento)
     db.session.commit()
     db.session.refresh(novo_consentimento)
@@ -149,14 +149,15 @@ def get_consent_all():
     consentimentos = db.session.query(Consentimento).all()
     return [consentimento.to_dict() for consentimento in consentimentos]
 
-def update_consent(consentimento_id: int, id_usuario: int, id_item_termo: int, id_termo: int):
+def update_consent(consentimento_id: int, id_usuario: int, id_item_termo: int, aceite_recusa: bool):
     consentimento = get_consent(consentimento_id, usage=True)
     
     if consentimento is None:
         return None
     consentimento.id_usuario = id_usuario
     consentimento.id_item_termo = id_item_termo
-    consentimento.id_termo = id_termo
+    consentimento.data_aceite = datetime.utcnow()
+    consentimento.aceite_recusa = aceite_recusa
     
     db.session.commit()
     db.session.refresh(consentimento)

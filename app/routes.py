@@ -132,12 +132,12 @@ def delete_item_term_route(item_termo_id: int):
 # Consentimento
 
 @bp.route("/consentimento/",methods=["POST"])
-def create_consent_route(id_usuario: int, id_item_termo: int, id_termo: int):
+def create_consent_route(id_usuario: int, id_item_termo: int, aceite_recusa: bool):
     data = request.get_json()
     id_usuario = int(data["id_usuario"])
     id_item_termo = int(data["id_item_termo"])
-    id_termo = int(data["id_termo"])
-    return jsonify(create_consent(id_usuario, id_item_termo, id_termo))
+    aceite_recusa = bool(data["aceite_recusa"])
+    return jsonify(create_consent(id_usuario, id_item_termo, aceite_recusa))
 
 @bp.route("/consentimento/<int:consentimento_id>", methods=["GET"])
 def get_consent_route(consentimento_id: int):
@@ -151,12 +151,12 @@ def get_all_consents_route():
     return jsonify(get_consent_all())
 
 @bp.route("/consentimento/<int:consentimento_id>", methods=["PUT"])
-def update_consent_route(consentimento_id: int, id_usuario: int, id_item_termo: int, id_termo: int):
+def update_consent_route(consentimento_id: int, id_usuario: int, id_item_termo: int, aceite_recusa: bool):
     data = request.get_json()
     id_usuario = int(data["id_usuario"])
     id_item_termo = int(data["id_item_termo"])
-    id_termo = int(data["id_termo"])
-    consent = update_consent(consentimento_id, id_usuario, id_item_termo, id_termo)
+    aceite_recusa = bool(data["aceite_recusa"])
+    consent = update_consent(consentimento_id, id_usuario, id_item_termo, aceite_recusa)
     if not consent:
         raise HTTPException(status_code=404, detail="Consentimento não encontrado")
     return jsonify(consent)

@@ -63,8 +63,8 @@ class Consentimento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     id_item_termo = db.Column(db.Integer, db.ForeignKey('itens_termos.id'), nullable=False)
-    id_termo = db.Column(db.Integer, db.ForeignKey('termos.id'), nullable=False)
     data_aceite = db.Column(db.DateTime, default=datetime.utcnow)
+    aceite_recusa = db.Column(db.Boolean, nullable=False)
     usuario = db.relationship("Usuario", back_populates="consentimentos")
     item_termo = db.relationship("ItemTermo", back_populates="consentimentos")
 
@@ -73,8 +73,8 @@ class Consentimento(db.Model):
             'id': self.id,
             'id_usuario': self.id_usuario,
             'id_item_termo': self.id_item_termo,
-            'id_termo': self.id_termo,
-            'data_aceite': self.data_aceite
+            'data_aceite': self.data_aceite,
+            'aceite_recusa': self.aceite_recusa
         }
 
 class HistoricoExclusao(db.Model):
