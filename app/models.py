@@ -10,13 +10,15 @@ class Usuario(db.Model):
     nome = db.Column(db.String(100), nullable=True, index=True)
     email = db.Column(db.String(120), unique=True, nullable=True)
     senha = db.Column(db.String(120), nullable=True)
+    ativo = db.Column(db.Boolean, default=True)
 
     def to_dict(self):
         return {
             'id': self.id,
             'nome': self.nome,
             'email': self.email,
-            'senha': self.senha
+            'senha': self.senha,
+            'ativo': self.ativo
         }
 
 class Termo(db.Model):

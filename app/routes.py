@@ -9,8 +9,6 @@ from app.crud import (
     create_consent, get_consent, get_consent_all, update_consent, delete_consent,
     create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all,)
 
-
-
 bp = Blueprint('routes', __name__)
 
 # USERS
@@ -18,8 +16,6 @@ bp = Blueprint('routes', __name__)
 @bp.route("/usuarios/", methods=["POST"])
 def create_user_route():
     data = request.get_json()
-    print("Data:", data)
-
     nome = data['nome']
     email = data['email']
     senha = data['senha']
@@ -39,11 +35,11 @@ def get_all_users_route():
 
 @bp.route("/usuarios/<int:usuario_id>",methods=["PUT"])
 def update_user_route(usuario_id: int):
-    data = request.form
-    nome = data.get("nome")
-    email = data.get("email")
-    senha = data.get("senha")
-    ativo = bool(data.get("ativo"))
+    data = request.get_json()
+    nome = data['nome']
+    email = data['email']
+    senha = data['senha']
+    ativo = bool(data["ativo"])
 
     user = update_user(usuario_id, nome, email, senha, ativo)
     if not user:
@@ -62,9 +58,9 @@ def delete_user_route(usuario_id: int):
 
 @bp.route("/termos/", methods=["POST"])
 def create_term_route():
-    data = request.form
-    versao = data.get("versao")
-    atual = data.get("atual")
+    data = request.get_json()
+    versao = data["versao"]
+    atual = data["atual"]
     return jsonify(create_term(versao, atual))
 
 @bp.route("/termos/<int:termo_id>", methods=["GET"])
@@ -80,9 +76,9 @@ def get_all_terms_route():
 
 @bp.route("/termos/<int:termo_id>", methods=["PUT"])
 def update_term_route(termo_id: int):
-    data = request.form
-    versao = data.get("versao")
-    atual = data.get("atual")    
+    data = request.get_json()
+    versao = data["versao"]
+    atual = data["atual" ]   
     term = update_term(termo_id, versao, atual)
     if not term:
         raise HTTPException(status_code=404, detail="Termo não encontrado")
@@ -99,9 +95,9 @@ def delete_term_route(termo_id: int):
 
 @bp.route("/termos/items/", methods=["POST"])
 def create_item_term_route(id_termo: int):
-    data = request.form
-    descricao = data.get("descricao")
-    obrigatorio = data.get("obrigatorio")
+    data = request.get_json()
+    descricao = data["descricao"]
+    obrigatorio = data["obrigatorio"]
     return jsonify(create_item_term(id_termo, descricao, obrigatorio))
 
 @bp.route("/termos/items/<int:item_termo_id>")
@@ -117,10 +113,10 @@ def get_all_items_term_route():
 
 @bp.route("/termos/items/<int:item_termo_id>", methods=["PUT"])
 def update_item_term_route(item_termo_id: int):
-    data = request.form
-    descricao = data.get("descricao")
-    id_termo = int(data.get("id_termo"))
-    obrigatorio = bool(data.get("obrigatorio"))
+    data = request.get_json()
+    descricao = data["descricao"]
+    id_termo = int(data["id_termo"])
+    obrigatorio = bool(data["obrigatorio"])
     item = update_item_term(item_termo_id, id_termo, descricao, obrigatorio)
     if not item:
         raise HTTPException(status_code=404, detail="Item do termo não encontrado")
@@ -137,10 +133,10 @@ def delete_item_term_route(item_termo_id: int):
 
 @bp.route("/consentimento/",methods=["POST"])
 def create_consent_route(id_usuario: int, id_item_termo: int, id_termo: int):
-    data = request.form
-    id_usuario = int(data.get("id_usuario"))
-    id_item_termo = int(data.get("id_item_termo"))
-    id_termo = int(data.get("id_termo"))
+    data = request.get_json()
+    id_usuario = int(data["id_usuario"])
+    id_item_termo = int(data["id_item_termo"])
+    id_termo = int(data["id_termo"])
     return jsonify(create_consent(id_usuario, id_item_termo, id_termo))
 
 @bp.route("/consentimento/<int:consentimento_id>", methods=["GET"])
@@ -156,10 +152,10 @@ def get_all_consents_route():
 
 @bp.route("/consentimento/<int:consentimento_id>", methods=["PUT"])
 def update_consent_route(consentimento_id: int, id_usuario: int, id_item_termo: int, id_termo: int):
-    data = request.form
-    id_usuario = int(data.get("id_usuario"))
-    id_item_termo = int(data.get("id_item_termo"))
-    id_termo = int(data.get("id_termo"))
+    data = request.get_json()
+    id_usuario = int(data["id_usuario"])
+    id_item_termo = int(data["id_item_termo"])
+    id_termo = int(data["id_termo"])
     consent = update_consent(consentimento_id, id_usuario, id_item_termo, id_termo)
     if not consent:
         raise HTTPException(status_code=404, detail="Consentimento não encontrado")

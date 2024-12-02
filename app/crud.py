@@ -10,7 +10,7 @@ def create_user(nome: str, email: str, senha: str):
         db.session.refresh(novo_usuario)
         return novo_usuario.to_dict()
     except Exception as e:
-        db.session.rollback()  # Reverte a transação em caso de erro
+        db.session.rollback()
         print("Erro ao criar usuário:", e)
         return None
 
@@ -29,10 +29,17 @@ def update_user(usuario_id: int, nome: str, email: str, senha: str, ativo: bool)
     usuario = get_user(usuario_id, usage=True)
     if usuario is None: 
         return None
+    
     usuario.nome = nome
     usuario.email = email
     usuario.senha = senha
     usuario.ativo = ativo
+    print("nome: ", nome)
+    print("email: ", email)
+    print("senha: ", senha)
+    print("ativo: ", ativo)
+    print("Usuario: ", usuario)
+
     
     db.session.commit()
     db.session.refresh(usuario)
