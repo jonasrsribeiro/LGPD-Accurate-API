@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.models import Usuario, Termo, Consentimento, HistoricoExclusaoDB2
 
 def create_user(db: Session, name: str, email: str, password: str):
-    new_user = Usuario(name=name, email=email, password=password)
+    new_user = Usuario(nome=name, email=email, senha=password)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -18,9 +18,9 @@ def update_user(db: Session, user_id: int, name: str, email: str, password: str)
     user = get_user(db, user_id)
     if user is None:
         return None
-    user.name = name
+    user.nome = name
     user.email = email
-    user.password = password
+    user.senha = password
     db.commit()
     db.refresh(user)
     return user
@@ -32,6 +32,8 @@ def delete_user(db: Session, user_id: int):
     db.delete(user)
     db.commit()
     return user
+
+
 
 
 

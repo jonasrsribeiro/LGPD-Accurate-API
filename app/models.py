@@ -11,14 +11,17 @@ class Usuario(Base):
     email = Column(String(120), unique=True, nullable=False)
     senha = Column(String(120), nullable=False)
 
+    consentimentos = relationship("Consentimento", back_populates="usuario")
+
 class Termo(Base):
     __tablename__ = 'termos'
 
     id = Column(Integer, primary_key=True)
     versao = Column(String(10), nullable=False)
-    itens_obrigatorios = Column(String, nullable=False)
-    itens_opcionais = Column(String, nullable=True)
+    
     data_criacao = Column(DateTime, default=datetime.utcnow)
+
+    itens = relationship("ItemTermo", back_populates="termo")
 
 class ItemTermo(Base):
     __tablename__ = 'itens_termos'
@@ -28,28 +31,23 @@ class ItemTermo(Base):
     descricao = Column(String, nullable=False)
     obrigatorio = Column(Boolean, nullable=False)
 
-    termo = relationship("ItemTermo", back_populates="termos")
-
-Termo.termos = relationship("ItemTermo", back_populates="termo")
+    termo = relationship("Termo", back_populates="itens")
+    consentimentos = relationship("Consentimento", back_populates="item_termo")
 
 class Consentimento(Base):
     __tablename__ = 'consentimentos'  
     id = Column(Integer, primary_key=True)
     
     id_usuario = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
-    
-    id_item_termo = Column(Integer, ForeignKey('items_termo.id'), nullable=False)
+    id_item_termo = Column(Integer, ForeignKey('itens_termos.id'), nullable=False)
     
     data_aceite = Column(DateTime, default=datetime.utcnow)
     
     usuario = relationship("Usuario", back_populates="consentimentos")
-    termo = relationship("ItemTermo", back_populates="consentimentos")
+    item_termo = relationship("ItemTermo", back_populates="consentimentos")
 
-Usuario.consentimentos = relationship("Consentimento", back_populates="usuario")
-ItemTermo.consentimentos = relationship("Consentimento", back_populates="item")
-
-class HistoricExclusion(Base):
-    __tablename__ = 'historic_exclusions'
+class HistoricoExclusaoDB2(Base):
+    __tablename__ = 'historico_exclusao_db2'
     id = Column(Integer, primary_key=True)
     usuario_id = Column(Integer, nullable=False)
     data_remocao = Column(DateTime, default=datetime.utcnow)
