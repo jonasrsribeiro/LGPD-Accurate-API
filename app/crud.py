@@ -1,39 +1,37 @@
 from sqlalchemy.orm import Session
 from app.models import Usuario, Termo, Consentimento, HistoricoExclusaoDB2
 
-def create_user(db: Session, name: str, email: str, password: str):
-    new_user = Usuario(nome=name, email=email, senha=password)
-    db.add(new_user)
+def create_user(db: Session, nome: str, email: str, senha: str):
+    novo_usuario = Usuario(nome=nome, email=email, senha=senha)
+    db.add(novo_usuario)
     db.commit()
-    db.refresh(new_user)
-    return new_user
+    db.refresh(novo_usuario)
+    return novo_usuario
 
-def get_user(db: Session, user_id: int):
-    return db.query(Usuario).filter(Usuario.id == user_id).first()
+def get_user(db: Session, usuario_id: int):
+    return db.query(Usuario).filter(Usuario.id == usuario_id).first()
 
 def get_user_all(db: Session):
     return db.query(Usuario).all()
 
-def update_user(db: Session, user_id: int, name: str, email: str, password: str):
-    user = get_user(db, user_id)
-    if user is None:
+def update_user(db: Session, usuario_id: int, nome: str, email: str, senha: str):
+    usuario = get_user(db, usuario_id)
+    if usuario is None:
         return None
-    user.nome = name
-    user.email = email
-    user.senha = password
+    usuario.nome = nome
+    usuario.email = email
+    usuario.senha = senha
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(usuario)
+    return usuario
 
-def delete_user(db: Session, user_id: int):
-    user = get_user(db, user_id)
-    if user is None:
+def delete_user(db: Session, usuario_id: int):
+    usuario = get_user(db, usuario_id)
+    if usuario is None:
         return None
-    db.delete(user)
+    db.delete(usuario)
     db.commit()
-    return user
-
-
+    return usuario
 
 
 
