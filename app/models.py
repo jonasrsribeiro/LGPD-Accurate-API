@@ -24,10 +24,7 @@ class Consent(Base):
     __tablename__ = 'consents'  
     id = Column(Integer, primary_key=True)
     
-    # Chave estrangeira para a tabela 'users'
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    
-    # Chave estrangeira para a tabela 'terms'
     term_id = Column(Integer, ForeignKey('terms.id'), nullable=False)
     
     accepted_at = Column(DateTime, default=datetime.utcnow)
