@@ -2,51 +2,43 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
+from app import db
 
-class User(Base):
-    __tablename__ = 'users'  
+class Usuario(Base):
+    __tablename__ = 'usuarios'  
     
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, index=True)
+    nome = Column(String, nullable=False, index=True)
     email = Column(String(120), unique=True, nullable=False)
-    password = Column(String(120), nullable=False)  # Encriptado
+    senha = Column(String(120), nullable=False)
 
-class Terms(Base):
-    __tablename__ = 'terms'
-
-    id = Column(Integer, primary_key=True)
-    version = Column(String(10), nullable=False)
-    current = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-class ItemTerm(Base):
-    __tablename__ = 'items_terms'
+class Termo(Base):
+    __tablename__ = 'termos'
 
     id = Column(Integer, primary_key=True)
-    term_id = Column(Integer, ForeignKey('terms.id'), nullable=False)
-    item = Column(String, nullable=False)
-    required = Column(Boolean, default=False)
-    description = Column(String, nullable=False)
-    
-    term = relationship("Term", back_populates="items")
+    versao = Column(String(10), nullable=False)
+    itens_obrigatorios = Column(String, nullable=False)
+    itens_opcionais = Column(String, nullable=True)
+    data_criacao = Column(DateTime, default=datetime.utcnow)
 
-class Consent(Base):
-    __tablename__ = 'consents'  
+class Consentimento(Base):
+    __tablename__ = 'consentimentos'  
     id = Column(Integer, primary_key=True)
     
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    item_term_id = Column(Integer, ForeignKey('items_terms.id'), nullable=False)
+    id_usuario = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
     
-    accepted_at = Column(DateTime, default=datetime.utcnow)
+    id_termo = Column(Integer, ForeignKey('termos.id'), nullable=False)
     
-    user = relationship("User", back_populates="consents")
-    term = relationship("Term", back_populates="consents")
+    data_aceite = Column(DateTime, default=datetime.utcnow)
+    
+    usuario = relationship("Usuario", back_populates="consentimentos")
+    termo = relationship("Termo", back_populates="consentimentos")
 
-User.consents = relationship("Consent", back_populates="user")
-Terms.consents = relationship("Consent", back_populates="term")
+Usuario.consentimentos = relationship("Consentimento", back_populates="usuario")
+Termo.consentimentos = relationship("Consentimento", back_populates="termo")
 
 class HistoricExclusion(Base):
     __tablename__ = 'historic_exclusions'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, nullable=False)
-    deleted_at = Column(DateTime, default=datetime.utcnow)
+    usuario_id = Column(Integer, nullable=False)
+    data_remocao = Column(DateTime, default=datetime.utcnow)
