@@ -1,6 +1,7 @@
 from http.client import HTTPException
 from flask import app, jsonify, request, render_template, Blueprint
 from .models import Usuario, Consentimento, Termo
+from .excluirUsarios import delete_users_based_on_historic
 from app.models import Usuario, Termo, ItemTermo, Consentimento, HistoricoExclusao
 from app.crud import (
     create_user, get_user, get_user_all, update_user, delete_user,
@@ -180,3 +181,8 @@ def get_historic_exclusion_route(historico_exclusao_id: int):
     if not historic:
         raise HTTPException(status_code=404, detail="Histórico de exclusão não encontrado")
     return jsonify(historic)
+
+@bp.route("/historico/exclusao/todos", methods=["DELETE"])
+def delete_all_users_based_on_historic():
+    ids = delete_users_based_on_historic()
+    return jsonify({"message": "Usuários excluídos com base no histórico", "ids": ids})
