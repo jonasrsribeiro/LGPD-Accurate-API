@@ -12,6 +12,33 @@ from app.crud import (
 bp = Blueprint('routes', __name__)
 
 # USERS
+@bp.route("/", methods=["GET", "POST"])
+def index():
+    termos = Termo.query.all()
+    termos_agrupados = []
+    for termo in termos:
+        itens = [
+            {
+                "id": item.id,
+                "descricao": item.descricao,
+                "obrigatorio": item.obrigatorio,
+            }
+            for item in termo.itens
+        ]
+        termos_agrupados.append(
+            {
+                "id": termo.id,
+                "versao": termo.versao,
+                "atual": termo.atual,
+                "data_criacao": termo.data_criacao.strftime("%Y-%m-%d %H:%M:%S"),
+                "itens": itens,
+            }
+        )
+    return render_template('consent.html', termos=termos_agrupados)
+
+@bp.route("/login/", methods=["GET","POST"])
+def login():
+    return render_template('login.html')
 
 @bp.route("/usuarios/", methods=["POST"])
 def create_user_route():
