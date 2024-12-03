@@ -5,9 +5,8 @@ from app.__init__ import create_app
 
 def criar_banco_de_dados():
     with app.app_context():
-        print("Criando tabelas no database 1...")
+        print("Criando tabelas no database...")
         db.create_all()
-        print("Criando tabelas no database 2...")
         engine_db2 = db.get_engine(app, bind='db2')
         db.metadata.create_all(bind=engine_db2)
         print("Databases criados com sucesso!")
