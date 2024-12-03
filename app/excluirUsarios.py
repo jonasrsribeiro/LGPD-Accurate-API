@@ -1,18 +1,15 @@
-from app.models import Usuario, HistoricExclusion
-from .database import get_db1, get_db2
+from .crud import get_historic_exclusion_all, get_user_all, delete_user_with_historic
 
 def delete_users_based_on_historic():
-    # Obtém os IDs dos usuários no histórico de exclusão
-    with next(get_db2()) as db2:
-        ids_to_exclude = db2.query(HistoricExclusion.usuario_id).all()
+    historic_records = get_historic_exclusion_all()
+    ids_to_exclude = [record['usuario_id'] for record in historic_records]
 
-    # Converte para uma lista de IDs (removendo tuplas)
-    ids_to_exclude = [user_id[0] for user_id in ids_to_exclude]
+    users = get_user_all()
 
-    # Exclui os usuários na tabela Usuario
     if ids_to_exclude:
-        with next(get_db1()) as db1:
-            db1.query(Usuario).filter(Usuario.id.in_(ids_to_exclude)).delete(synchronize_session=False)
-            db1.commit()
+        for user in users:
+            if user['id'] in ids_to_exclude and user['ativo'] and user['nome'] and user['email'] and user['senha']:
+                print(user)
+                delete_user_with_historic(user['id'])
 
     return ids_to_exclude
