@@ -167,3 +167,16 @@ def delete_consent_route(consentimento_id: int):
     if not consent:
         raise HTTPException(status_code=404, detail="Consentimento não encontrado")
     return jsonify({"message": "Consentimento excluído com sucesso", "consentimento": consent})
+
+## HISTORICO DE EXCLUSAO
+
+@bp.route("/historico/exclusao/", methods=["GET"])
+def get_all_historic_exclusion_route():
+    return jsonify(get_historic_exclusion_all())
+
+@bp.route("/historico/exclusao/<int:historico_exclusao_id>", methods=["GET"])
+def get_historic_exclusion_route(historico_exclusao_id: int):
+    historic = get_historic_exclusion(historico_exclusao_id)
+    if not historic:
+        raise HTTPException(status_code=404, detail="Histórico de exclusão não encontrado")
+    return jsonify(historic)

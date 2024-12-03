@@ -50,9 +50,15 @@ def delete_user(usuario_id: int):
     usuario = get_user(usuario_id, usage=True)
     if usuario is None:
         return None
+    usuario.ativo = False
+    usuario.nome = ''
+    usuario.email = ''
+    usuario.senha = ''
+    
     print("Usuario: ", usuario)
-    db.session.delete(usuario)
     db.session.commit()
+    db.session.refresh(usuario)
+    create_historic_exclusion(usuario_id)
     return usuario.to_dict()
 
 def create_term(versao: str, atual: bool):
@@ -191,5 +197,17 @@ def get_historic_exclusion_all(usage=False):
     if usage:
         return hitorico_exclusoes
     return [historico_exclusao.to_dict() for historico_exclusao in hitorico_exclusoes]
+
+def delete_user_with_historic(usuario_id: int):
+    usuario = get_user(usuario_id, usage=True)
+    if usuario is None:
+        return None
+    usuario.ativo = False
+    usuario.nome = ''
+    usuario.email = ''
+    usuario.senha = ''
+    db.session.commit()
+    db.session.refresh(usuario)
+    return usuario.to_dict()
 
 
