@@ -1,37 +1,45 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from config import Config
+from database import Usuario
 
 def enviar_notificacao(email_destino, assunto, mensagem):
-    email_origem = 'seu_email@example.com'
-    senha = 'sua_senha'
+    SMTP_SERVER = 'smtp.gmail.com'
+    SMTP_PORT = 587
+    EMAIL = 'nocloud76@gmail.com'
+    EMAIL_PASSWORD = 'fngq edxc vwsz wukl'
 
     msg = MIMEMultipart()
-    msg['From'] = email_origem
+    msg['From'] = EMAIL
     msg['To'] = email_destino
     msg['Subject'] = assunto
 
     msg.attach(MIMEText(mensagem, 'plain'))
 
     try:
-        server = smtplib.SMTP('smtp.example.com', 587)
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
-        server.login(email_origem, senha)
+        server.login(EMAIL, EMAIL_PASSWORD)
         texto = msg.as_string()
-        server.sendmail(email_origem, email_destino, texto)
+        server.sendmail(EMAIL, email_destino, texto)
         server.quit()
         print("Notificação enviada com sucesso!")
     except Exception as e:
         print(f"Falha ao enviar notificação: {e}")
 
-def verificar_intercorrencia(dados_atuais, novos_dados):
-    if dados_atuais != novos_dados:
-        assunto = "Notificação de Intercorrência nos Dados Pessoais"
-        mensagem = "Houve uma alteração nos seus dados pessoais."
-        enviar_notificacao('destinatario@example.com', assunto, mensagem)
+def verificar_e_enviar_notificacao(user_id, assunto, mensagem):
+    engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    usuario = session.query(Usuario).filter_by(id=user_id).first()
+    if usuario and usuario.ativo:
+        enviar_notificacao(usuario.email, assunto, mensagem)
+    else:
+        print("Usuário não encontrado ou inativo.")
 
 # Exemplo de uso
-dados_atuais = {'nome': 'João', 'email': 'joao@example.com'}
-novos_dados = {'nome': 'João', 'email': 'joao_novo@example.com'}
-
-verificar_intercorrencia(dados_atuais, novos_dados)
+verificar_e_enviar_notificacao(1, "Notificação de Intercorrência nos Dados Pessoais", "Houve uma alteração nos seus dados pessoais.")
