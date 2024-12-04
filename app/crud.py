@@ -246,4 +246,5 @@ def verify_user_historic_exclusion(usuario_id: int):
         return True
     else:
         delete_user_with_historic(usuario_id)
+        return False
 
