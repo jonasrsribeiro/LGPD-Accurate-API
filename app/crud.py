@@ -210,4 +210,10 @@ def delete_user_with_historic(usuario_id: int):
     db.session.refresh(usuario)
     return usuario.to_dict()
 
+def verify_user_historic_exclusion(usuario_id: int):
+    usuario = get_historic_exclusion(usuario_id, usage=True)
+    if usuario is None:
+        return None
+    else:
+        delete_user_with_historic(usuario_id)
 
