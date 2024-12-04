@@ -8,7 +8,7 @@ from app.crud import (
     create_term, get_term, get_term_all, update_term, delete_term,
     create_item_term, get_item_term, get_item_term_all, update_item_term, delete_item_term,
     create_consent, get_consent, get_consent_all, update_consent, delete_consent,
-    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all,)
+    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all, verify_user_historic_exclusion, get_user_by_email_password)
 
 bp = Blueprint('routes', __name__)
 
@@ -40,6 +40,27 @@ def index():
 @bp.route("/login/", methods=["GET","POST"])
 def login():
     return render_template('login.html')
+
+@bp.route("/logar/", methods=["POST"])
+def logar():
+    data = request.get_json()
+    email = data['email']
+    senha = data['senha']
+    if not email or not senha:
+        return jsonify({"message": "Email e senha são obrigatórios"})
+    user =  get_user_by_email_password(email=email, senha=senha)
+    if user is None:
+        return jsonify({"message": "Usuário não encontrado"})
+    veriify = verify_user_historic_exclusion(user.id)
+    if veriify:
+        print("Usuário excluído")
+        print("Usuário Não existe")
+        return jsonify({"message": "Usuário Não existe"})
+
+    ## RESTO DO CODIGO
+
+    return jsonify(user.to_dict())
+
 
 @bp.route("/usuarios/", methods=["POST"])
 def create_user_route():

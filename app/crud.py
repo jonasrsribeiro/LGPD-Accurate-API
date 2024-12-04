@@ -23,6 +23,13 @@ def get_user(usuario_id: int, usage=False):
         return usuario
     return usuario.to_dict()
 
+def get_user_by_email_password(email: str, senha, usage=False):
+    usuario = db.session.query(Usuario).filter(Usuario.email == email, Usuario.senha == senha).first()
+    if usage:
+        return usuario
+    return usuario.to_dict()
+    
+
 def get_user_all():
     usuarios = db.session.query(Usuario).all()
     return [usuario.to_dict() for usuario in usuarios]
@@ -236,7 +243,7 @@ def delete_user_with_historic(usuario_id: int):
 def verify_user_historic_exclusion(usuario_id: int):
     usuario = get_historic_exclusion(usuario_id, usage=True)
     if usuario is None:
-        return None
+        return True
     else:
         delete_user_with_historic(usuario_id)
 
