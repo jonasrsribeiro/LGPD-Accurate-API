@@ -3,8 +3,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from config import Config
-from database import Usuario
+from config import Config  # Importação absoluta
+from app.models import Usuario  # Importação absoluta
 
 def enviar_notificacao(email_destino, assunto, mensagem):
     SMTP_SERVER = 'smtp.gmail.com'
@@ -26,20 +26,21 @@ def enviar_notificacao(email_destino, assunto, mensagem):
         texto = msg.as_string()
         server.sendmail(EMAIL, email_destino, texto)
         server.quit()
-        print("Notificação enviada com sucesso!")
+        print(f"Notificação enviada para {email_destino}")
     except Exception as e:
         print(f"Falha ao enviar notificação: {e}")
 
-def verificar_e_enviar_notificacao(user_id, assunto, mensagem):
+def enviar_notificacoes_para_todos(assunto, mensagem):
     engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    usuario = session.query(Usuario).filter_by(id=user_id).first()
-    if usuario and usuario.ativo:
+    usuarios = session.query(Usuario).filter_by(ativo=True).all()
+    for usuario in usuarios:
         enviar_notificacao(usuario.email, assunto, mensagem)
-    else:
-        print("Usuário não encontrado ou inativo.")
+        print(f"Notificação enviada para {usuario.email}")
 
-# Exemplo de uso
-verificar_e_enviar_notificacao(1, "Notificação de Intercorrência nos Dados Pessoais", "Houve uma alteração nos seus dados pessoais.")
+if __name__ == "__main__":
+    assunto = "Notificação de Segurança"
+    mensagem = "Houve um problema de segurança e seus dados podem ter sido comprometidos. Por favor, tome as medidas necessárias."
+    enviar_notificacoes_para_todos(assunto, mensagem)
