@@ -1,17 +1,66 @@
 from http.client import HTTPException
 from flask import app, jsonify, request, render_template, Blueprint
 from .models import Usuario, Consentimento, Termo
+from .excluirUsarios import delete_users_based_on_historic
 from app.models import Usuario, Termo, ItemTermo, Consentimento, HistoricoExclusao
 from app.crud import (
     create_user, get_user, get_user_all, update_user, delete_user,
     create_term, get_term, get_term_all, update_term, delete_term,
     create_item_term, get_item_term, get_item_term_all, update_item_term, delete_item_term,
     create_consent, get_consent, get_consent_all, update_consent, delete_consent,
-    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all,)
+    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all, verify_user_historic_exclusion, get_user_by_email_password)
 
 bp = Blueprint('routes', __name__)
 
 # USERS
+@bp.route("/", methods=["GET", "POST"])
+def index():
+    termos = Termo.query.all()
+    termos_agrupados = []
+    for termo in termos:
+        itens = [
+            {
+                "id": item.id,
+                "descricao": item.descricao,
+                "obrigatorio": item.obrigatorio,
+            }
+            for item in termo.itens
+        ]
+        termos_agrupados.append(
+            {
+                "id": termo.id,
+                "versao": termo.versao,
+                "atual": termo.atual,
+                "data_criacao": termo.data_criacao.strftime("%Y-%m-%d %H:%M:%S"),
+                "itens": itens,
+            }
+        )
+    return render_template('consent.html', termos=termos_agrupados)
+
+@bp.route("/login/", methods=["GET","POST"])
+def login():
+    return render_template('login.html')
+
+@bp.route("/logar/", methods=["POST"])
+def logar():
+    data = request.get_json()
+    email = data['email']
+    senha = data['senha']
+    if not email or not senha:
+        return jsonify({"message": "Email e senha são obrigatórios"})
+    user =  get_user_by_email_password(email=email, senha=senha)
+    if user is None:
+        return jsonify({"message": "Usuário não encontrado"})
+    veriify = verify_user_historic_exclusion(user.id)
+    if veriify:
+        print("Usuário excluído")
+        print("Usuário Não existe")
+        return jsonify({"message": "Usuário Não existe"})
+
+    ## RESTO DO CODIGO
+
+    return jsonify(user.to_dict())
+
 
 @bp.route("/usuarios/", methods=["POST"])
 def create_user_route():
@@ -167,3 +216,21 @@ def delete_consent_route(consentimento_id: int):
     if not consent:
         raise HTTPException(status_code=404, detail="Consentimento não encontrado")
     return jsonify({"message": "Consentimento excluído com sucesso", "consentimento": consent})
+
+## HISTORICO DE EXCLUSAO
+
+@bp.route("/historico/exclusao/", methods=["GET"])
+def get_all_historic_exclusion_route():
+    return jsonify(get_historic_exclusion_all())
+
+@bp.route("/historico/exclusao/<int:historico_exclusao_id>", methods=["GET"])
+def get_historic_exclusion_route(historico_exclusao_id: int):
+    historic = get_historic_exclusion(historico_exclusao_id)
+    if not historic:
+        raise HTTPException(status_code=404, detail="Histórico de exclusão não encontrado")
+    return jsonify(historic)
+
+@bp.route("/historico/exclusao/todos", methods=["DELETE"])
+def delete_all_users_based_on_historic():
+    ids = delete_users_based_on_historic()
+    return jsonify({"message": "Usuários excluídos com base no histórico", "ids": ids})

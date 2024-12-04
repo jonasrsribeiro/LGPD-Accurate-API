@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,14 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+        }
+        .termo-container {
+            margin-bottom: 30px;
+        }
+        .termo-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
         }
         table {
             width: 100%;
@@ -24,20 +32,23 @@
         th {
             background-color: #f4f4f4;
         }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
         button {
             padding: 10px 15px;
-            margin: 5px;
             cursor: pointer;
+            border: none;
         }
         button.accept {
             background-color: #4CAF50;
             color: white;
-            border: none;
         }
         button.revoke {
             background-color: #f44336;
             color: white;
-            border: none;
         }
         button:disabled {
             background-color: #ccc;
@@ -47,38 +58,42 @@
 </head>
 <body>
     <h1>Termos e Consentimentos</h1>
-
     <form method="POST" action="/consentimento/aceitar">
-        <table>
-            <thead>
-                <tr>
-                    <th>Termo</th>
-                    <th>Versão</th>
-                    <th>Obrigatório</th>
-                    <th>Consentimento</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for term in terms %}
-                <tr>
-                    <td>{{ term.description }}</td>
-                    <td>{{ term.version }}</td>
-                    <td>{{ "Sim" if term.mandatory else "Não" }}</td>
-                    <td>
-                        <input 
-                            type="checkbox" 
-                            name="term_{{ term.id }}" 
-                            value="1" 
-                            {% if term.mandatory %}checked disabled{% elif term.consent_given %}checked{% endif %}>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <button type="submit" class="accept">Aceitar</button>
-        <button type="button" class="revoke" onclick="revokeConsent()">Revogar</button>
+        {% for termo in termos %}
+        <div class="termo-container">
+            <div class="termo-title">Versão do Termo: {{ termo.versao }}</div>
+            <p>Data de Criação: {{ termo.data_criacao }}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Obrigatório</th>
+                        <th>Consentimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in termo.itens %}
+                    <tr>
+                        <td>{{ item.descricao }}</td>
+                        <td>{{ "Sim" if item.obrigatorio else "Não" }}</td>
+                        <td>
+                            <input 
+                                type="checkbox" 
+                                name="item_{{ item.id }}" 
+                                value="1" 
+                                {% if item.obrigatorio %}checked disabled{% endif %}>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+        <div class="button-container">
+            <button type="submit" class="accept">Aceitar</button>
+            <button type="button" class="revoke" onclick="revokeConsent()">Revogar</button>
+        </div>
     </form>
-
     <script>
         function revokeConsent() {
             if (confirm("Tem certeza de que deseja revogar os consentimentos?")) {
