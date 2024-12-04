@@ -2,6 +2,8 @@ from app.models import Usuario, Termo, Consentimento, HistoricoExclusao, ItemTer
 from .database import db
 from datetime import datetime
 
+## USER
+
 def create_user(nome: str, email: str, senha: str):
     try:
         novo_usuario = Usuario(nome=nome, email=email, senha=senha)
@@ -61,6 +63,9 @@ def delete_user(usuario_id: int):
     create_historic_exclusion(usuario_id)
     return usuario.to_dict()
 
+
+## TERM
+
 def create_term(versao: str, atual: bool):
     novo_termo = Termo(versao=versao, atual=atual)
     
@@ -99,6 +104,8 @@ def delete_term(termo_id: int):
     db.session.commit()
     return termo    
 
+## ITEM TERM
+
 def create_item_term(id_termo: int, descricao: str, obrigatorio: bool):
     novo_item_termo = ItemTermo(id_termo=id_termo, descricao=descricao, obrigatorio=obrigatorio)
     
@@ -115,6 +122,10 @@ def get_item_term(item_termo_id: int, usage=False):
 
 def get_item_term_all():
     items_termos = db.session.query(ItemTermo).all()
+    return [item_termo.to_dict() for item_termo in items_termos]
+
+def get_item_term_by_term(termo_id: int):
+    items_termos = db.session.query(ItemTermo).filter(ItemTermo.id_termo == termo_id).all()
     return [item_termo.to_dict() for item_termo in items_termos]
 
 def update_item_term(item_termo_id: int, id_termo: int, descricao: str, obrigatorio: bool):
@@ -137,6 +148,8 @@ def delete_item_term(item_termo_id: int):
     db.session.delete(item_termo)
     db.session.commit()
     return item_termo
+
+## CONSENT
 
 def create_consent(id_usuario: int, id_item_termo: int, aceite_recusa: bool):
     novo_consentimento = Consentimento(id_usuario=id_usuario, id_item_termo=id_item_termo, aceite_recusa=aceite_recusa)
@@ -178,6 +191,8 @@ def delete_consent(consentimento_id: int):
     db.session.delete(consentimento)
     db.session.commit()
     return consentimento.to_dict()
+
+## HISTORIC EXCLUSION
 
 def create_historic_exclusion(usuario_id: int):
     nova_exclusao = HistoricoExclusao(usuario_id=usuario_id)
