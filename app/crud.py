@@ -164,6 +164,14 @@ def get_consent(consentimento_id: int, usage=False):
         return consentimento
     return consentimento.to_dict()
 
+def get_consent_by_user(usuario_id: int):
+    consentimentos = db.session.query(Consentimento).filter(Consentimento.id_usuario == usuario_id).all()
+    return [consentimento.to_dict() for consentimento in consentimentos]
+
+def get_consent_by_item(item_termo_id: int):
+    consentimentos = db.session.query(Consentimento).filter(Consentimento.id_item_termo == item_termo_id).all()
+    return [consentimento.to_dict() for consentimento in consentimentos]
+
 def get_consent_all():
     consentimentos = db.session.query(Consentimento).all()
     return [consentimento.to_dict() for consentimento in consentimentos]
