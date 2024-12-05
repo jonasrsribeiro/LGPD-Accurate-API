@@ -38,8 +38,7 @@ def enviar_notificacoes_para_todos(assunto, mensagem):
     usuarios = session.query(Usuario).filter_by(ativo=True).all()
     for usuario in usuarios:
         enviar_notificacao(usuario.email, assunto, mensagem)
-        print(f"Notificação enviada para {usuario.email}")
-
+       
 if __name__ == "__main__":
     assunto = "Notificação de Segurança"
     mensagem = "Houve um problema de segurança e seus dados podem ter sido comprometidos. Por favor, tome as medidas necessárias."
