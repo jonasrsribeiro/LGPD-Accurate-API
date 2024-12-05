@@ -8,13 +8,23 @@ from app.crud import (
     create_term, get_term, get_term_all, update_term, delete_term,
     create_item_term, get_item_term, get_item_term_all, update_item_term, delete_item_term,
     create_consent, get_consent, get_consent_all, update_consent, delete_consent,
-    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all, verify_user_historic_exclusion, get_user_by_email_password)
+    create_historic_exclusion, get_historic_exclusion, get_historic_exclusion_all, verify_user_historic_exclusion,
+    get_user_by_email_password, solicitar_token, portabilidade)
 
 bp = Blueprint('routes', __name__)
 
 # USERS
-@bp.route("/", methods=["GET", "POST"])
-def index():
+
+@bp.route('/solicitar-token/<int:user_id>', methods=['GET'])
+def rota_solicitar_token(user_id: int):
+    return jsonify(solicitar_token(user_id))
+
+@bp.route('/portabilidade/<int:user_id>', methods=['GET'])
+def rota_portabilidade(user_id: int):
+    return jsonify(portabilidade(user_id))
+
+@bp.route("/dashboard/", methods=["GET", "POST"])
+def dashboard():
     termos = Termo.query.all()
     termos_agrupados = []
     for termo in termos:
@@ -41,25 +51,21 @@ def index():
 def login():
     return render_template('login.html')
 
-@bp.route("/logar/", methods=["POST"])
+@bp.route('/logar/', methods=['POST'])
 def logar():
     data = request.get_json()
-    email = data['email']
-    senha = data['senha']
-    if not email or not senha:
-        return jsonify({"message": "Email e senha são obrigatórios"})
-    user =  get_user_by_email_password(email=email, senha=senha)
-    if user is None:
-        return jsonify({"message": "Usuário não encontrado"})
-    veriify = verify_user_historic_exclusion(user.id)
-    if veriify:
-        print("Usuário excluído")
-        print("Usuário Não existe")
-        return jsonify({"message": "Usuário Não existe"})
-
-    ## RESTO DO CODIGO
-
-    return jsonify(user.to_dict())
+    email = data.get('email')
+    senha = data.get('senha')
+    
+    usuario = Usuario.query.filter_by(email=email, senha=senha).first()
+    
+    if usuario:
+        veriify = verify_user_historic_exclusion(usuario.id)
+        if veriify:
+            return jsonify({"message": "Usuario nao existe"})
+        return jsonify({"message": "Login bem-sucedido", "user": usuario.to_dict()})
+    else:
+        return jsonify({"message": "Usuario ou senha invalidos"}), 401
 
 
 @bp.route("/usuarios/", methods=["POST"])
@@ -75,7 +81,7 @@ def create_user_route():
 def get_user_route(usuario_id: int):
     user = get_user(usuario_id)
     if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise HTTPException(status_code=404, detail="Usuario nao encontrado")
     return jsonify(user)
 
 @bp.route("/usuarios/", methods=["GET"])
@@ -92,14 +98,14 @@ def update_user_route(usuario_id: int):
 
     user = update_user(usuario_id, nome, email, senha, ativo)
     if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise HTTPException(status_code=404, detail="Usuario nao encontrado")
     return jsonify(user)
 
 @bp.route("/usuarios/deletar/<int:usuario_id>", methods=["DELETE"])
 def delete_user_route(usuario_id: int):
     user = delete_user(usuario_id)
     if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise HTTPException(status_code=404, detail="Usuario nao encontrado")
     return jsonify({"message": "Usuário excluído com sucesso", "usuario": user})
 
 
@@ -143,8 +149,9 @@ def delete_term_route(termo_id: int):
 # ITEMS DOS TERMOS
 
 @bp.route("/termos/items/", methods=["POST"])
-def create_item_term_route(id_termo: int):
+def create_item_term_route():
     data = request.get_json()
+    id_termo = data["id_termo"]
     descricao = data["descricao"]
     obrigatorio = data["obrigatorio"]
     return jsonify(create_item_term(id_termo, descricao, obrigatorio))
@@ -180,8 +187,8 @@ def delete_item_term_route(item_termo_id: int):
 
 # Consentimento
 
-@bp.route("/consentimento/",methods=["POST"])
-def create_consent_route(id_usuario: int, id_item_termo: int, aceite_recusa: bool):
+@bp.route("/consent/",methods=["POST"])
+def create_consent_route():
     data = request.get_json()
     id_usuario = int(data["id_usuario"])
     id_item_termo = int(data["id_item_termo"])

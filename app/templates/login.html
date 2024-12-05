@@ -68,12 +68,18 @@
             background-color: #f44336;
             color: white;
         }
+        #error-message {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h1 class="login-title">Login</h1>
-        <form method="POST" action="/login">
+        <form id="loginForm">
             <div class="form-group">
                 <label for="username">Usuário</label>
                 <input type="text" id="username" name="username" placeholder="Digite seu usuário" required>
@@ -87,6 +93,28 @@
                 <button type="reset" class="reset">Limpar</button>
             </div>
         </form>
+        <p id="error-message">Usuário ou senha inválidos. Tente novamente.</p>
     </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            fetch("/api/logar/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: username, senha: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                    window.location.href = "/api/dashboard/";
+            })
+        });
+    </script>
 </body>
 </html>

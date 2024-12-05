@@ -1,8 +1,35 @@
+from flask import abort, jsonify, request
 from app.models import Usuario, Termo, Consentimento, HistoricoExclusao, ItemTermo
 from .database import db
 from datetime import datetime
+import uuid
+
+tokens = {}
 
 ## USER
+def solicitar_token(user_id: int):
+    user = Usuario.query.filter_by(id=user_id).first()
+    if not user:
+        return abort(404, description="Usuario nao encontrado")
+    
+    token = str(uuid.uuid4())
+    tokens[user_id] = token
+    
+    return jsonify({
+        "message": "Token gerado com sucesso.",
+        "token": token
+    })
+    
+def portabilidade(user_id):
+    token = request.headers.get('Authorization')
+    if not token or tokens.get(user_id) != token:
+        return abort(403, description="Token inválido ou ausente")
+    
+    user = Usuario.query.filter_by(id=user_id).first()
+    if not user:
+        return abort(404, description="Usuario nao encontrado")
+    
+    return jsonify(user.to_dict())
 
 def create_user(nome: str, email: str, senha: str):
     try:
@@ -25,10 +52,10 @@ def get_user(usuario_id: int, usage=False):
 
 def get_user_by_email_password(email: str, senha, usage=False):
     usuario = db.session.query(Usuario).filter(Usuario.email == email, Usuario.senha == senha).first()
+    print("Usuario: ", usuario)
     if usage:
         return usuario
     return usuario.to_dict()
-    
 
 def get_user_all():
     usuarios = db.session.query(Usuario).all()
@@ -50,7 +77,6 @@ def update_user(usuario_id: int, nome: str, email: str, senha: str, ativo: bool)
     print("ativo: ", ativo)
     print("Usuario: ", usuario)
 
-    
     db.session.commit()
     db.session.refresh(usuario)
     return usuario.to_dict()
@@ -119,7 +145,7 @@ def create_item_term(id_termo: int, descricao: str, obrigatorio: bool):
     db.session.add(novo_item_termo)
     db.session.commit()
     db.session.refresh(novo_item_termo)
-    return novo_item_termo
+    return novo_item_termo.to_dict()
 
 def get_item_term(item_termo_id: int, usage=False):
     item_termo = db.session.query(ItemTermo).filter(ItemTermo.id == item_termo_id).first()

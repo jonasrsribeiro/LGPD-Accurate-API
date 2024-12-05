@@ -58,48 +58,76 @@
 </head>
 <body>
     <h1>Termos e Consentimentos</h1>
-    <form method="POST" action="/consentimento/aceitar">
+    <form id="consent-form">
+        {% set max_id = termos | map(attribute='id') | max %}
         {% for termo in termos %}
-        <div class="termo-container">
-            <div class="termo-title">Versão do Termo: {{ termo.versao }}</div>
-            <p>Data de Criação: {{ termo.data_criacao }}</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th>Obrigatório</th>
-                        <th>Consentimento</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in termo.itens %}
-                    <tr>
-                        <td>{{ item.descricao }}</td>
-                        <td>{{ "Sim" if item.obrigatorio else "Não" }}</td>
-                        <td>
-                            <input 
-                                type="checkbox" 
-                                name="item_{{ item.id }}" 
-                                value="1" 
-                                {% if item.obrigatorio %}checked disabled{% endif %}>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% if termo.id == max_id %}
+                <div class="termo-container">
+                    <div class="termo-title">Versão do Termo: {{ termo.versao }}</div>
+                    <p>Data de Criação: {{ termo.data_criacao }}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Obrigatório</th>
+                                <th>Consentimento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in termo.itens %}
+                            <tr>
+                                <td>{{ item.descricao }}</td>
+                                <td>{{ "Sim" if item.obrigatorio else "Não" }}</td>
+                                <td>
+                                    <input 
+                                        type="checkbox" 
+                                        name="item_{{ item.id }}" 
+                                        value="1" 
+                                        {% if item.obrigatorio %}checked disabled{% endif %}>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         {% endfor %}
         <div class="button-container">
             <button type="submit" class="accept">Aceitar</button>
             <button type="button" class="revoke" onclick="revokeConsent()">Revogar</button>
         </div>
     </form>
+
     <script>
-        function revokeConsent() {
-            if (confirm("Tem certeza de que deseja revogar os consentimentos?")) {
-                window.location.href = "/consentimento/revogar";
-            }
-        }
+        document.getElementById('consent-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const consentData = {};
+
+            formData.forEach((value, key) => {
+                const itemId = key.split('_')[1];
+                consentData[`id_item_termo`] = itemId;
+                consentData[`aceite_recusa`] = value === '1';
+                consentData[`id_usuario`] = 1;
+            });
+
+            // Enviar os dados para o backend via Fetch API
+            fetch('/api/consent/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(consentData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Sucesso:', data);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+            });
+        });
     </script>
 </body>
 </html>
