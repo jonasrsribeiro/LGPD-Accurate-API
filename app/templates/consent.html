@@ -96,37 +96,66 @@
             <button type="submit" class="accept">Aceitar</button>
             <button type="button" class="revoke" onclick="revokeConsent()">Revogar</button>
         </div>
+        <br>
     </form>
 
     <script>
         document.getElementById('consent-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+        event.preventDefault();
 
-            const formData = new FormData(this);
-            const consentData = {};
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const consentData = {
+            usuario: {
+                id_usuario: 1
+            },
+            itens: []
+        };
 
-            formData.forEach((value, key) => {
-                const itemId = key.split('_')[1];
-                consentData[`id_item_termo`] = itemId;
-                consentData[`aceite_recusa`] = value === '1';
-                consentData[`id_usuario`] = 1;
+        checkboxes.forEach((checkbox) => {
+            const itemId = checkbox.name.split('_')[1];
+            const aceite = checkbox.checked;
+
+            consentData.itens.push({
+                id_item_termo: parseInt(itemId),
+                aceite_recusa: aceite
             });
+        });
 
-            // Enviar os dados para o backend via Fetch API
-            fetch('/api/consent/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(consentData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Sucesso:', data);
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-            });
+        fetch('/api/consent/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(consentData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Sucesso:', data);
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
+
+
+        document.getElementById('generate-token').addEventListener('click', async () => {
+            const userId = 1;
+            const messageElement = document.getElementById('message');
+            try {
+                const response = await fetch(`/solicitar-token/${userId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao gerar token');
+                }
+
+                const data = await response.json();
+                console.log(data.token);
+
+                messageElement.textContent = "Dados compartilhados com sucesso!";
+            } catch (error) {
+                console.error(error);
+                messageElement.textContent = "Ocorreu um erro ao compartilhar os dados.";
+            }
+        });
         });
     </script>
 </body>

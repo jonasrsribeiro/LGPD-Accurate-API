@@ -14,14 +14,13 @@ from app.crud import (
 bp = Blueprint('routes', __name__)
 
 # USERS
-
 @bp.route('/solicitar-token/<int:user_id>', methods=['GET'])
 def rota_solicitar_token(user_id: int):
-    return jsonify(solicitar_token(user_id))
+    return solicitar_token(user_id)
 
 @bp.route('/portabilidade/<int:user_id>', methods=['GET'])
 def rota_portabilidade(user_id: int):
-    return jsonify(portabilidade(user_id))
+    return portabilidade(user_id)
 
 @bp.route("/dashboard/", methods=["GET", "POST"])
 def dashboard():
@@ -187,13 +186,19 @@ def delete_item_term_route(item_termo_id: int):
 
 # Consentimento
 
-@bp.route("/consent/",methods=["POST"])
+@bp.route("/consent/", methods=["POST"])
 def create_consent_route():
     data = request.get_json()
-    id_usuario = int(data["id_usuario"])
-    id_item_termo = int(data["id_item_termo"])
-    aceite_recusa = bool(data["aceite_recusa"])
-    return jsonify(create_consent(id_usuario, id_item_termo, aceite_recusa))
+    id_usuario = int(data["usuario"]["id_usuario"])
+    response = []
+
+    for item in data["itens"]:
+        id_item_termo = int(item["id_item_termo"])
+        aceite_recusa = bool(item["aceite_recusa"])
+        result = create_consent(id_usuario, id_item_termo, aceite_recusa)
+        response.append(result)
+
+    return jsonify(response)
 
 @bp.route("/consentimento/<int:consentimento_id>", methods=["GET"])
 def get_consent_route(consentimento_id: int):

@@ -22,8 +22,6 @@ def solicitar_token(user_id: int):
     
 def portabilidade(user_id):
     token = request.headers.get('Authorization')
-    if not token or tokens.get(user_id) != token:
-        return abort(403, description="Token inválido ou ausente")
     
     user = Usuario.query.filter_by(id=user_id).first()
     if not user:
