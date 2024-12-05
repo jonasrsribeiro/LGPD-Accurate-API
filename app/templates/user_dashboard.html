@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Meu Perfil</h1>
+<form method="POST">
+    <div class="mb-3">
+        <label for="nome" class="form-label">Nome</label>
+        <input type="text" name="nome" class="form-control" value="{{ user.nome }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="senha" class="form-label">Senha</label>
+        <input type="password" name="senha" class="form-control" value="{{ user.senha }}" required>
+    </div>
+    <div class="form-check">
+        <input type="checkbox" name="ativo" class="form-check-input" id="ativo" {% if user.ativo %}checked{% endif %}>
+        <label for="ativo" class="form-check-label">Ativo</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+</form>
+<form method="POST" action="{{ url_for('delete_account') }}">
+    <button type="submit" class="btn btn-danger mt-3">Deletar Conta</button>
+</form>
+{% endblock %}

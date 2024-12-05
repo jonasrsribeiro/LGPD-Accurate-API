@@ -57,7 +57,7 @@ def logar():
     email = data.get('email')
     senha = data.get('senha')
     
-    usuario = Usuario.query.filter_by(email=email, senha=senha).first()
+    usuario = Usuario.query.filter_by(email=email, senha=senha, ativo=True).first()
     
     if usuario:
         veriify = verify_user_historic_exclusion(usuario.id)
