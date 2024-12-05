@@ -30,7 +30,10 @@ def enviar_notificacao(email_destino, assunto, mensagem):
     except Exception as e:
         print(f"Falha ao enviar notificação: {e}")
 
-def enviar_notificacoes_para_todos(assunto, mensagem):
+def enviar_notificacoes_para_todos():
+    assunto = "Notificação de Segurança"
+    mensagem = "Houve um problema de segurança e seus dados podem ter sido comprometidos. Por favor, tome as medidas necessárias."
+    
     engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -38,8 +41,6 @@ def enviar_notificacoes_para_todos(assunto, mensagem):
     usuarios = session.query(Usuario).filter_by(ativo=True).all()
     for usuario in usuarios:
         enviar_notificacao(usuario.email, assunto, mensagem)
-       
+        
 if __name__ == "__main__":
-    assunto = "Notificação de Segurança"
-    mensagem = "Houve um problema de segurança e seus dados podem ter sido comprometidos. Por favor, tome as medidas necessárias."
-    enviar_notificacoes_para_todos(assunto, mensagem)
+    enviar_notificacoes_para_todos()

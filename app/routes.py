@@ -1,5 +1,7 @@
 from http.client import HTTPException
 from flask import app, jsonify, request, render_template, Blueprint
+
+from app.notification import enviar_notificacoes_para_todos
 from .models import Usuario, Consentimento, Termo
 from .excluirUsarios import delete_users_based_on_historic
 from app.models import Usuario, Termo, ItemTermo, Consentimento, HistoricoExclusao
@@ -246,3 +248,12 @@ def get_historic_exclusion_route(historico_exclusao_id: int):
 def delete_all_users_based_on_historic():
     ids = delete_users_based_on_historic()
     return jsonify({"message": "Usuários excluídos com base no histórico", "ids": ids})
+
+@bp.route("/notificar_usuarios", methods=["POST"])
+def notificar_usuarios():
+    enviar_notificacoes_para_todos()
+    return jsonify({"message": "Notificações enviadas com sucesso!"})
+
+@bp.route("/emergency", methods=["GET"])
+def emergency_page():
+    return render_template("notification.html")
