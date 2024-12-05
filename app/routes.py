@@ -251,9 +251,9 @@ def delete_all_users_based_on_historic():
 
 @bp.route("/notificar_usuarios", methods=["POST"])
 def notificar_usuarios():
-    enviar_notificacoes_para_todos()
-    return jsonify({"message": "Notificações enviadas com sucesso!"})
+    emails_enviados = enviar_notificacoes_para_todos()
+    return jsonify({"message": "Notificações enviadas com sucesso!", "emails": emails_enviados})
 
-@bp.route("/emergency", methods=["GET"])
+@bp.route("/panico", methods=["GET"])
 def emergency_page():
     return render_template("notification.html")

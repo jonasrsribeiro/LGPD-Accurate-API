@@ -39,8 +39,12 @@ def enviar_notificacoes_para_todos():
     session = Session()
 
     usuarios = session.query(Usuario).filter_by(ativo=True).all()
+    emails_enviados = []
     for usuario in usuarios:
         enviar_notificacao(usuario.email, assunto, mensagem)
-        
+        emails_enviados.append(usuario.email)
+           
+    return emails_enviados
+
 if __name__ == "__main__":
     enviar_notificacoes_para_todos()

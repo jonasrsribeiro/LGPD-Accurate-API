@@ -4,8 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Botão de Emergência</title>
+    <style>
+        #loading {
+            display: none;
+            font-size: 1.2em;
+            color: red;
+        }
+        #panicButton {
+            background-color: red;
+            color: white;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        #panicButton:hover {
+            background-color: darkred;
+        }
+        #panicButton:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
     <script>
         function enviarNotificacao() {
+           
+            document.getElementById('loading').style.display = 'block';
+            const panicButton = document.getElementById('panicButton');
+            panicButton.disabled = true;
+
             fetch('/api/notificar_usuarios', {  // Atualizado para usar o prefixo de URL
                 method: 'POST',
                 headers: {
@@ -14,16 +41,36 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                alert('Notificações enviadas com sucesso!');
+                document.getElementById('loading').style.display = 'none';
+                panicButton.disabled = false;
+                const emailList = document.getElementById('emailList');
+                emailList.innerHTML = '';
+                if (data.emails && data.emails.length > 0) {
+                    data.emails.forEach(email => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Notificação enviada para ${email}`;
+                        emailList.appendChild(listItem);
+                    });
+                } else {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = 'Nenhuma notificação enviada.';
+                    emailList.appendChild(listItem);
+                }
             })
             .catch(error => {
                 console.error('Erro ao enviar notificações:', error);
+                alert('Erro ao enviar notificações.');
+                document.getElementById('loading').style.display = 'none';
+                panicButton.disabled = false;
             });
         }
     </script>
 </head>
 <body>
     <h1>Botão de Emergência</h1>
-    <button onclick="enviarNotificacao()">Enviar Notificação de Emergência</button>
+    <button id="panicButton" onclick="enviarNotificacao()">Enviar Notificação de Emergência</button>
+    <div id="loading">Enviando notificações...</div>
+    <ul id="emailList"></ul>
 </body>
 </html>
